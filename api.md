@@ -5,8 +5,6 @@
 
 - apiTcp.proto ：长连接协议
 
-
-
 # 公共协议部分
 
 - 错误码
@@ -87,7 +85,7 @@ enum ResultCode {
   }
   ```
 
-- **登录**
+### **登录**
 
   + C2S
 
@@ -112,7 +110,7 @@ enum ResultCode {
     }
     ```
 
-- **注册**
+###  **注册**
 
   + C2S
 
@@ -134,7 +132,26 @@ enum ResultCode {
     ```
     
 
+###  请求MQTT服务器列表 
 
+  - C2S
+
+    ```protobuf
+    message C2S_MqttList {
+    	string token;
+    }
+    ```
+
+    
+
+  - S2C
+
+    ```protobuf
+    message S2C_MqttList {
+    }
+    ```
+
+    
 
 ## 范例
 
@@ -300,7 +317,11 @@ end
   }
   ```
   
+
+
+
 ### 选择游戏
+
 - Type: Requests and Responses
 
 - Topic: <u>**SelectGame**</u>
@@ -320,279 +341,7 @@ end
 
 
 
-## 多台百家乐
-
-##### 获取多台百家乐列表（12桌）
-
-- Type:Requests and Responses
-
-- Topic:<u>**GetMoreBaccaratDeskInfoList**</u>
-
-- C2S
-
-  ```protobuf
-  message C2S_GetMoreBaccaratDeskInfoList{
-   	
-  }
-  ```
-
-- S2C
-
-  ```protobuf
-  message MoreBaccaratDeskInfo{
-  	sint32 game_id;			//游戏ID,ID对应游戏通过读表同步
-  	sint32 desk_id;			//牌桌ID
-  	string hero_icon;		//人物头像地址（图片可能存储在本地，可能为头像名称）
-  	
-  	repeated string road_list;		//百家乐路单格式
-  	
-  	//Push_StageSync 百家乐游戏阶段同步（下注，开牌，结算，洗牌）
-  	sint32 game_stage;		//	读表获取阶段ID
-  	sint64 start_time;		//	开始时间
-      sint64 ent_time;		//	结束时间
-      sint64 push_time;		//	协议发出时间
-      //	下列参数, 同时只存在一个
-      BetStage bet_data;					//	下注阶段
-      OpenCardStage open_card_data;		//	取数和开牌阶段
-      SettleStage settle_data;			//	结算阶段
-      ShuffleStage shuffle_data;			//	换牌靴阶段
-  }
-  
-  //Successful Response
-  message S2C_GetMoreBaccaratDeskInfoList{
-  	repeated MoreBaccaratDeskInfo desk_info_list;
-  }
-  //Fail Response
-  message S2C_GetMoreBaccaratDeskInfoList{
-  
-  }
-  ```
-
-
-
-##### 多台列表刷新（12桌）
-
-- Type:Push 
-
-- Topic:<u>**RefreshMoreBaccarat**</u>
-
-- Push
-
-  ```protobuf
-  message Push_RefreshMoreBaccarat{
-  	sint32 desk_id;
-  	
-  	//repeated string road_list;		//百家乐路单格式,结算状态时有值
-  	//Push_StageSync 百家乐游戏阶段同步（下注，开牌，结算，洗牌）
-  	sint32 game_stage;		//	读表获取阶段ID
-  	sint64 start_time;		//	开始时间
-      sint64 ent_time;		//	结束时间
-      sint64 push_time;		//	协议发出时间
-       //	下列参数, 同时只存在一个,只需简化版
-      BetStage bet_data;					//	下注阶段
-      OpenCardStage open_card_data;		//	取数和开牌阶段
-      SettleStage settle_data;			//	结算阶段,数据没错可以从此得到单个路单数据（待定）
-      ShuffleStage shuffle_data;			//	换牌靴阶段
-  }
-  ```
-
-  
-
-
-
-##### 获取多台百家乐所有桌子列表
-
-- Type:Requests and Responses
-
-- Topic:<u>**GetMoreBaccaratAllDeskInfoList**</u>
-
-- C2S
-
-  ```protobuf
-  message C2S_GetMoreBaccaratAllDeskInfoList{
-  	
-  }
-  
-  
-  ```
-
-- S2C
-
-  ```protobuf
-  message MoreBaccaratListDeskInfo{
-  	sint32 game_id;			//游戏ID,ID对应游戏通过读表同步
-  	sint32 desk_id;			//牌桌ID
-  	string hero_icon;		//人物头像地址（图片可能存储在本地，可能为头像名称）
-  	
-  	sint32 good_way_type;	//好路类型 0表示不是好路
-  	repeated string road_list;		//百家乐路单格式
-  	
-  	//Push_StageSync 百家乐游戏阶段同步（下注，开牌，结算，洗牌）
-  	sint32 game_stage;		//	读表获取阶段ID
-  	sint64 start_time;		//	开始时间
-      sint64 ent_time;		//	结束时间
-      sint64 push_time;		//	协议发出时间
-  }
-  
-  message S2C_GetMoreBaccaratAllDeskInfoList{
-  	repeated MoreBaccaratListDeskInfo desk_info_list;
-  }
-  
-  ```
-
-
-
-##### 多台桌子列表刷新
-
-- Type:Push
-
-- Topic:<u>**RefreshMoreBaccaratList**</u>
-
-- Push
-
-  ```protobuf
-  message Push_RefreshMoreBaccaratList{
-  	sint32 desk_id;
-  	
-  	sint32 good_way_type;	//好路类型 0表示不是好路
-  	string road;		//百家乐路单格式,结算时刷新
-  	
-  	//Push_StageSync 百家乐游戏阶段同步（下注，开牌，结算，洗牌）
-  	sint32 game_stage;		//	读表获取阶段ID
-  	
-  }
-  ```
-
-##### 多台交换桌子
-
-- Type:Requests and Respones
-
-- Topic:<u>**MoreBaccaratExchangeDesk**</u>
-
-- C2S
-
-  ```protobuf
-  message C2S_MoreBaccaratExchangeDesk{
-  	sint32 old_game_id;
-  	sint32 old_desk_id;
-  	sint32 new_game_id;
-  	sint32 new_desk_id;
-  }
-  ```
-
-- S2C
-
-  ```protobuf
-  message S2C_MoreBaccaratExchangeDesk{
-  	MoreBaccaratDeskInfo new_desk_info;		//新桌子信息
-  	MoreBaccaratListDeskInfo old_desk_info;		//原桌子被替换后的信息（待定）
-  }
-  ```
-
-
-
-##### 历史记录（玩家输赢记录）
-
-- Type:Requests and Responses
-
-- Topic:<u>**GetChipHistoryRecordList**</u>
-
-- C2S
-
-  ```protobuf
-  //<策划案/百家乐/历史记录>
-  message C2S_GetChipHistoryRecordList{
-  	sint32 click_type;		//1:投注记录 2：额度记录
-  	sint32 time_type;		//1:一天内，2：3天内；3：1周内；4：1个月
-  	sint32 game_id;		//0：全部,其余为游戏配表id
-  }
-  ```
-
-- S2C
-
-  ```protobuf
-  message ChipInfo{		//投注记录
-  	string round_id;		//局号
-  	sint32 time;			//该局开始的时间
-  	sint32 game_id;
-  	sint32 desk_id;
-  	string result; //player-point,banker-point
-  	string play_type;		//玩法 （百家乐有 经典-幸运6），其他游戏需查看策划案《历史记录》
-  	uint64 play_money;		//该局下注总额
-  	int64 win_money;		//下注输赢结果	
-  }
-  
-  message LimitInfo{	//额度记录
-  	sint32 time;
-  	bool bWin;	//下注是否赢钱
-  	uint64 before_money;		//下注前余额
-  	int64 income_moeny;		//收入
-  	int64 expend_money;		//下注总额度
-  	uint64 after_money;		//下注后金额
-  }
-  
-  message S2C_GetChipHistoryRecordList{
-  	sint32 click_type;		//显示哪种类型记录
-  	uint64 total_play_money;		//查询时间段内下注总额(收入)
-  	int64 total_win_money;			//查询时间段内输赢总额（支出）
-  	
-  	//click_type 不同，二选一
-  	repeated ChipInfo chip_info_list;
-  	repeated LimitInfo limit_info_list;
-  }
-  ```
-
-
-
-##### 复核过程
-
-- Type:Requests and Responses
-
-- Topic:GetReCheckInfo
-
-- C2S
-
-  ```protobuf
-  message C2S_GetReCheckInfo{
-  	sint32 game_id;
-  	string round_id;
-  }
-  ```
-
-- S2C
-
-  ```protobuf
-  
-  message CommonRoundInfo{
-  	sint32 player_point;
-  	sint32 banker_point;
-  	repeated Card card_list;
-  }
-  
-  message VideoPokerInfo{
-  	repeated Card card_list;
-  }
-  
-  message LuckyWheelInfo{
-  	repeated string num_list;
-  }
-  
-  message S2C_GetRecheckInfo{
-  	sint32 game_id;			//用于游戏区分
-  	string round_id;		//局号
-  	sint32 pre_time;		//预定EOS时间
-  	string pre_eos_num;			//预定EOS区块号
-  	sint32 time;			//Eos产生时间
-  	string eos_num;			//EOS
-  	
-  	//甴game_id区别，只有一个被赋值
-  	CommonRoundInfo common_round_info;
-  	VideoPokerInfo video_poker_info;
-  	LuckyWheelInfo lucky_wheel_info;
-  }
-  ```
-
-  
+- 
 
 ### 获取牌桌信息(暂定可跨游戏获取信息)
 
@@ -603,7 +352,6 @@ end
   ```protobuf
   message C2S_GetDeskInfoList {
   	sint32 game_id;		//	游戏ID, ID对应游戏通过读表同步
-  	sint32 desk_id;		//	牌桌ID, 0为获取全部, 非0获取对应信息
   }
   ```
 - S2C
@@ -706,24 +454,26 @@ message RedBlackRoad {
 
   ```protobuf
   message C2S_GetRoadDetailInfo {
-  	sint32 shoe_id;
+  	string shoe_id;
   }
   ```
 
 + S2C
 
   ```protobuf
+  // 经典百家乐
   message BaccaratDetailInfo {
-  	int32 round_id;  //用于取值验证，最好唯一标识符
-  	string winner;				//	胜路者 banker or player
-  	sint32 Player_point;
-  	sint32 banker_point;
-  	repeated Card player_cards;
-  	repeated Card banker_cards;
+  	int32 round_id;  				//	用于取值验证，最好唯一标识
+  	sint32 player_point;			//	闲 点数
+  	sint32 banker_point;			// 	庄 点数
+  	repeated string player_cards;	// 	闲牌 详情
+  	repeated string banker_cards;	// 	庄牌 详情
+  	
   }
   
+  //龙虎
   message TheBigBattleDetailInfo {
-  	int32 round_id;  //用于取值验证，最好唯一标识符
+  	int32 round_id;  			//	用于取值验证，最好唯一标识符
   	string winner;				//	胜利者 dragon or tiger 待定
   	sint32 dragon_point;
   	sint32 tiger_point;
@@ -731,23 +481,27 @@ message RedBlackRoad {
   	repeated Card tiger_card;
   }
   
+  //红黑
   message RedBlackDetailInfo {
-  	int32 round_id;  //用于取值验证，最好唯一标识符
+  	int32 round_id;  			//	用于取值验证，最好唯一标识符
   	string winner;				//	胜利者 red or black or 待定
-  	sint32 red_point;     //红后点数（1-6 代表对子，单张，等等）
-  	sint32 black_point;    //红后点数（1-6 代表对子，单张，等等）
+  	sint32 red_point;     		//	红后点数（1-6 代表对子，单张，等等）
+  	sint32 black_point;    		//	红后点数（1-6 代表对子，单张，等等）
   	repeated Card red_cards;
   	repeated Card black_cards;
   }
   
   message S2C_GetRoadDetailInfo {
-  	sint32 game_count;		//	局数
-  	sint32 begin_time;		//	开始时间
-  	sint32 last_time;		//	最后时间
+  	sint32 game_count;			//	局数
+  	sint64 shoeId_time;			//	牌靴产生的时间
+  	sint64 curr_time;			//	当前时间 
+  	repeated string road_list;	// 	路单
   	//	以下参数只存在其中一个
-  	repeated BaccaratDetailInfo baccarat_list;    	//	百家乐路单, 参照 路单数据格式
+  	repeated BaccaratDetailInfo baccarat_list;    		//	百家乐路单, 参照 路单数据格式
+  	
+  	
   	repeated TheBigBattleDetailInfo theBigBattle_list;  //	龙虎斗路单, 参照 路单数据格式
-  	repeated RedBlackDetailInfo redBlack_list;    	//	红黑大战路单, 参照 路单数据格式
+  	repeated RedBlackDetailInfo redBlack_list;    		//	红黑大战路单, 参照 路单数据格式
   }
   ```
 
@@ -772,14 +526,14 @@ message RedBlackRoad {
   
   ```protobuf
   .message GoodWayInfo {
-  	sint32 game_id;				// 游戏ID, ID对应游戏通过读表同步
+  	sint32 game_id;				// 	游戏ID, ID对应游戏通过读表同步
   	sint32 desk_id;				//	桌号
   	sint32 good_way_index;		//	好路类型, 读表
   	sint32 game_count;			//	局数
   	sint32 game_stage;			//	游戏阶段, 读表
   	sint32 begin_time;			//	阶段开始时间
   	sint32 end_time;			//	阶段结束时间
-  	repeated string road_list;	// 根据游戏ID来，返回 不同类型的 路单
+  	repeated string road_list;	// 	根据游戏ID来，返回 不同类型的 路单
   }
   
   message S2C_GetGoodWayRecommend {
@@ -841,6 +595,7 @@ message BetInfoShow {
 //	桌子上的玩家信息
 message PlayerInfo {
 	string user_id;			// 	玩家ID
+	string name;			// 	玩家名字
 	string portrait;		//	玩家头像 (URL)
 	sint32 vip;				// 	是否是VIP
 	sint64 chip;			// 	余额 (预留字段, 回执内不一定存在)	
@@ -863,7 +618,7 @@ message PlayerInfo {
 
   ```protobuf
   message C2S_EnterDesk {
-  	ssint32 desk_id;		//	1 - 99  ：指定进入牌桌, 0：则是快速加入 
+  	sint32 desk_id;		//	1 - 99  ：指定进入牌桌, 0：则是快速加入 
   }
   ```
 
@@ -875,25 +630,35 @@ message PlayerInfo {
   	sint32 limit_min;				//	限红下限
   	sint32 limit_max;				//	限红上限
   	string shoe_id;					//	牌靴号
-  	sint32 game_stage;				//	读表获取阶段ID
-  	int64 enter_time;				//	进入牌桌时间, 以服务器时间为准
   	repeated string all_card_list;	//	当前牌靴所有牌
   	repeated string used_cards;		//	已使用过的牌组
   	repeated PlayerInfo player_list;// 	桌子上玩家信息
   	sint32 game_count;				//	当前局数
+  	Push_StageSync stage;       	//	当前阶段的数据
+  	BetInfoShow bet_list			// 	已经下注的信息
   }
   ```
 
+##### 进入牌桌推送
 
++ Type: Push
 
-##### 游戏阶段同步
++ Topic: **NormalBaccaratEnterDeskSync**
+
+  ```protobuf
+  message Push_EnterDesk {
+  	PlayerInfo player_list;			//	进入的 桌子的玩家信息
+  }
+  ```
+
+##### 游戏阶段同步推送
 + Type: Push
 + Topic: <u>**NormalBaccaratStageSync**</u>
     ```protobuf
     //	下注阶段
     message BetStage {
         string lock_id;					//	预锁定的ID 目前没用，区块链使用
-        repeated string all_card_list;	//	当前牌靴所有牌
+        repeated string all_card_list;	//	当前牌靴剩余的牌
         repeated string used_cards;		//	已使用过的牌组
     }
 
@@ -902,43 +667,45 @@ message PlayerInfo {
         string time;				//	区块链时间 毫秒
         string id;					//	区块链ID
         string hash;				//	区块链哈希值
-		string code;				//	区块链取数得到的值
+		sint32 code;				//	区块链取数得到的值
     }
     //	取数阶段
     message FetchNumStage {
-       repeated OpenBlocks open_blocks; //锁定的取数数据
+       repeated OpenBlocks open_blocks; 	//	锁定的取数数据
     }
 
     //开牌阶段
     message OpenCardStage {
         repeated string playerPoker;		//	闲家的牌
         repeated string bankerPoker;		//	庄家的牌
-		bool isRed;							//是否有红牌
-    }
-
+		bool isRed;							//	是否有红牌
+    	 repeated OpenBlocks open_blocks; 	//	锁定的取数数据
+}
+    
     //	下注和结算 详细数据
     message SettleCardInfo {
-        string userId;				//	玩家ID
-        repeated BetInfo betInfo; 	//	下注信息
-        repeated BetInfo settleInfo;//	结算信息
+        string userId;			//	玩家ID
+       	BetInfoShowo betInfo; 	//	下注信息
+        BetInfo settleInfo;		//	结算信息
+    	sint64 chip;			// 	余额
     }
-
-    //	下注阶段
-    message SettleStage {
+    
+    //	结算阶段
+    message SettleStage { 
         sint32 player_point;					//	闲家点数
-        sint32 banker_point;					//	庄家点数
-        BetInfo resultInfo; 					//	计算后的结果 信息
+	    sint32 banker_point;					//	庄家点数
+    	BetInfo win_area;						//  赢的区域 1：赢 0：未赢
         repeated string playerPoker;			//	闲家的牌
         repeated string bankerPoker;			//	庄家的牌
         repeated SettleCardInfo settle_cards;	//	下注和结算 详细数据
     }
-
+    
     //	换牌靴阶段
     message ShuffleStage {
-        sint32 shoe_id;
+        string shoe_id;
         repeated string card_list;
     }
-
+        
     //	第一次订阅频道, 初始化同步信息
     //	切换游戏阶段
     message Push_StageSync {
@@ -949,7 +716,7 @@ message PlayerInfo {
         sint64 push_time;		//	协议发出时间
         //	下列参数, 同时只存在一个
         BetStage bet_data;					//	下注阶段
-        FetchNumStage FetchNum;	//	取数
+        FetchNumStage FetchNum;				//	取数
         OpenCardStage open_card_data;		//	取数和开牌阶段
         SettleStage settle_data;			//	下注阶段
         ShuffleStage shuffle_data;			//	换牌靴阶段
@@ -972,7 +739,7 @@ message PlayerInfo {
 		BetInfoShow bet_list;	//	发送下注的数额
   }
   ```
-  
+
 - S2C
 
   ```protobuf
@@ -982,7 +749,6 @@ message PlayerInfo {
   	sint64 chip;			//	筹码余额  
   }
   ```
-
 ###### 撤销下注
 
 -  Type: Requests and Push 
@@ -1006,10 +772,6 @@ message PlayerInfo {
    	sint64 chip;		//	筹码余额  
    }
    ```
-```
-   
-   
-
 ###### 下注庄闲互换
 
 + Type: Requests and Push
@@ -1022,36 +784,60 @@ message PlayerInfo {
   //	庄闲互换
   message C2S_ChangePB {
   }
-```
+  ```
 
 + S2c
 
     ```protobuf
     //	Successful Response
-    message S2CChangePB {
+    message S2C_ChangePB {
     }
     ```
 
-##### 下注推送
 
+##### 下注推送
+###### 确认下注推送 
 + Type: Push
 
 + Topic: <u>**NormalBaccaratSyncBet**</u>
 
   ```protobuf
   message Push_BetSync {
-	int32 user_id;		//玩家Id
+		string user_id;			//	玩家Id
   	BetInfoShow bet_list;	//	获取对应位置所有的数额
+  	sint64 chip;			//	当前的余额
   }
   ```
+###### 庄闲互换推送
 
++ Type: Push
+
++ Topic: **NormalBaccaratSyncBetChangePB**
+
+  ```protobuf
+  message Push_BetSync
+	```
+  
+######  撤销下注推送
+
++ Type: Push
+
++ Topic: **NormalBaccaratSyncRevocationBet**
+
+  ```protobuf
+  message Push_BetRevocationSync {
+		string user_id;		//	玩家Id
+  	BetInfo bet_info;	//	获取对应 位置
+  	sint64 chip;		//	当前的余额
+  }
+  ```
 
 
 ##### 离开牌桌
 
 - Type: Requests and Push
 
-- Topic: <u>**NormalBaccaratLeaveDesk**</u>
+- Topic: **NormalBaccaratLeaveDesk**
 
 - C2S
 
@@ -1064,10 +850,21 @@ message PlayerInfo {
 
   ```protobuf
   message S2C_LeaveDesk {
+  }	
+  ```
+
+##### 离开牌桌 推送
+
++ Type: Push
+
++ Topic: **NormalBaccaratLeaveDeskSync**
+
+  ```protobuf
+  message Push_LeaveDesk {
+  	string user_id;			//	玩家Id
   }
   ```
 
-  
 
 #### 龙虎斗
 
@@ -1472,4 +1269,321 @@ message PlayerInfo {
   	LuckWeelBetInfo bet_info;		//	获取对应位置所有的数额
   }
   ```
+
+
+
+#### 蛇神之环
+
+##### 蛇神之环下注
+
+- Type: Push
+- Topic: <u>**SnakeWeelBet**</u>
+
+```protobuf
+message Snake_BetInfo{
+     sint32 rank; //下注者所在排名位置
+     string userid //玩家id
+     uint32 bet_num //下注数量   
+     
+}
+
+message Push_SnakeWeelBet { 
+	BetInfo bet_info_list;		//	下注列表
+}
+```
+
+
+
+
+
+## 多台百家乐
+
+### 获取多台百家乐列表（12桌）
+
+- Type:Requests and Responses
+
+- Topic:<u>**GetMoreBaccaratDeskInfoList**</u>
+
+- C2S
+
+  ```protobuf
+  message C2S_GetMoreBaccaratDeskInfoList{
+   	
+  }
+  ```
+
+- S2C
+
+  ```protobuf
+  message MoreBaccaratDeskInfo{
+  	sint32 game_id;			//游戏ID,ID对应游戏通过读表同步
+  	sint32 desk_id;			//牌桌ID
+  	string hero_icon;		//人物头像地址（图片可能存储在本地，可能为头像名称）
+  	
+  	repeated string road_list;		//百家乐路单格式
+  	
+  	//Push_StageSync 百家乐游戏阶段同步（下注，开牌，结算，洗牌）
+  	sint32 game_stage;		//	读表获取阶段ID
+  	sint64 start_time;		//	开始时间
+      sint64 ent_time;		//	结束时间
+      sint64 push_time;		//	协议发出时间
+      //	下列参数, 同时只存在一个
+      BetStage bet_data;					//	下注阶段
+      OpenCardStage open_card_data;		//	取数和开牌阶段
+      SettleStage settle_data;			//	结算阶段
+      ShuffleStage shuffle_data;			//	换牌靴阶段
+  }
+  
+  //Successful Response
+  message S2C_GetMoreBaccaratDeskInfoList{
+  	repeated MoreBaccaratDeskInfo desk_info_list;
+  }
+  //Fail Response
+  message S2C_GetMoreBaccaratDeskInfoList{
+  
+  }
+  ```
+
+
+
+### 多台列表刷新（12桌）
+
+- Type:Push 
+
+- Topic:<u>**RefreshMoreBaccarat**</u>
+
+- Push
+
+  ```protobuf
+  message Push_RefreshMoreBaccarat{
+  	sint32 desk_id;
+  	
+  	//repeated string road_list;		//百家乐路单格式,结算状态时有值
+  	//Push_StageSync 百家乐游戏阶段同步（下注，开牌，结算，洗牌）
+  	sint32 game_stage;		//	读表获取阶段ID
+  	sint64 start_time;		//	开始时间
+      sint64 ent_time;		//	结束时间
+      sint64 push_time;		//	协议发出时间
+       //	下列参数, 同时只存在一个,只需简化版
+      BetStage bet_data;					//	下注阶段
+      OpenCardStage open_card_data;		//	取数和开牌阶段
+      SettleStage settle_data;			//	结算阶段,数据没错可以从此得到单个路单数据（待定）
+      ShuffleStage shuffle_data;			//	换牌靴阶段
+  }
+  ```
+
+  
+
+
+
+### 获取多台百家乐所有桌子列表
+
+- Type:Requests and Responses
+
+- Topic:<u>**GetMoreBaccaratAllDeskInfoList**</u>
+
+- C2S
+
+  ```protobuf
+  message C2S_GetMoreBaccaratAllDeskInfoList{
+  	
+  }
+  
+  
+  ```
+
+- S2C
+
+  ```protobuf
+  message MoreBaccaratListDeskInfo{
+  	sint32 game_id;			//游戏ID,ID对应游戏通过读表同步
+  	sint32 desk_id;			//牌桌ID
+  	string hero_icon;		//人物头像地址（图片可能存储在本地，可能为头像名称）
+  	
+  	sint32 good_way_type;	//好路类型 0表示不是好路
+  	repeated string road_list;		//百家乐路单格式
+  	
+  	//Push_StageSync 百家乐游戏阶段同步（下注，开牌，结算，洗牌）
+  	sint32 game_stage;		//	读表获取阶段ID
+  	sint64 start_time;		//	开始时间
+      sint64 ent_time;		//	结束时间
+      sint64 push_time;		//	协议发出时间
+  }
+  
+  message S2C_GetMoreBaccaratAllDeskInfoList{
+  	repeated MoreBaccaratListDeskInfo desk_info_list;
+  }
+  
+  ```
+
+
+
+### 多台桌子列表刷新
+
+- Type:Push
+
+- Topic:<u>**RefreshMoreBaccaratList**</u>
+
+- Push
+
+  ```protobuf
+  message Push_RefreshMoreBaccaratList{
+  	sint32 desk_id;
+  	
+  	sint32 good_way_type;	//好路类型 0表示不是好路
+  	string road;		//百家乐路单格式,结算时刷新
+  	
+  	//Push_StageSync 百家乐游戏阶段同步（下注，开牌，结算，洗牌）
+  	sint32 game_stage;		//	读表获取阶段ID
+  	
+  }
+  ```
+
+### 多台交换桌子
+
+- Type:Requests and Respones
+
+- Topic:<u>**MoreBaccaratExchangeDesk**</u>
+
+- C2S
+
+  ```protobuf
+  message C2S_MoreBaccaratExchangeDesk{
+  	sint32 old_game_id;
+  	sint32 old_desk_id;
+  	sint32 new_game_id;
+  	sint32 new_desk_id;
+  }
+  ```
+
+- S2C
+
+  ```protobuf
+  message S2C_MoreBaccaratExchangeDesk{
+  	MoreBaccaratDeskInfo new_desk_info;		//新桌子信息
+  	MoreBaccaratListDeskInfo old_desk_info;		//原桌子被替换后的信息（待定）
+  }
+  ```
+
+
+
+### 历史记录（玩家输赢记录）
+
+- Type:Requests and Responses
+
+- Topic:<u>**GetChipHistoryRecordList**</u>
+
+- C2S
+
+  ```protobuf
+  //<策划案/百家乐/历史记录>
+  message C2S_GetChipHistoryRecordList{
+  	sint32 click_type;		//1:投注记录 2：额度记录
+  	sint32 time_type;		//1:一天内，2：3天内；3：1周内；4：1个月
+  	sint32 game_id;		//0：全部,其余为游戏配表id
+  }
+  ```
+
+- S2C
+
+  ```protobuf
+  message ChipInfo{		//投注记录
+  	string round_id;		//局号
+  	sint32 time;			//该局开始的时间
+  	sint32 game_id;
+  	sint32 desk_id;
+  	string result; //player-point,banker-point
+  	string play_type;		//玩法 （百家乐有 经典-幸运6），其他游戏需查看策划案《历史记录》
+  	uint64 play_money;		//该局下注总额
+  	int64 win_money;		//下注输赢结果	
+  }
+  
+  message LimitInfo{	//额度记录
+  	sint32 time;
+  	bool bWin;	//下注是否赢钱
+  	uint64 before_money;		//下注前余额
+  	int64 income_moeny;		//收入
+  	int64 expend_money;		//下注总额度
+  	uint64 after_money;		//下注后金额
+  }
+  
+  message S2C_GetChipHistoryRecordList{
+  	sint32 click_type;		//显示哪种类型记录
+  	uint64 total_play_money;		//查询时间段内下注总额(收入)
+  	int64 total_win_money;			//查询时间段内输赢总额（支出）
+  	
+  	//click_type 不同，二选一
+  	repeated ChipInfo chip_info_list;
+  	repeated LimitInfo limit_info_list;
+  }
+  ```
+
+
+
+### 复核过程
+
+- Type:Requests and Responses
+
+- Topic:GetReCheckInfo
+
+- C2S
+
+  ```protobuf
+  message C2S_GetReCheckInfo{
+  	sint32 game_id;
+  	string round_id;
+  }
+  ```
+
+- S2C
+
+  ```protobuf
+  message CommonRoundInfo{
+  	sint32 player_point;
+  	sint32 banker_point;
+  	repeated Card card_list;
+  }
+  
+  message VideoPokerInfo{
+  	repeated Card card_list;
+  }
+  
+  message LuckyWheelInfo{
+  	repeated string num_list;
+  }
+  
+  message S2C_GetRecheckInfo{
+  	sint32 game_id;			//用于游戏区分
+  	string round_id;		//局号
+  	sint32 pre_time;		//预定EOS时间
+  	string pre_eos_num;			//预定EOS区块号
+  	sint32 time;			//Eos产生时间
+  	string eos_num;			//EOS
+  	
+  	//甴game_id区别，只有一个被赋值
+  	CommonRoundInfo common_round_info;
+  	VideoPokerInfo video_poker_info;
+  	LuckyWheelInfo lucky_wheel_info;
+  }
+  ```
+
+  
+
+### 刷新玩家筹码
+
+- Type:Push 
+
+- Topic:<u>**RefreshPlayerChip**</u>
+
+- Push
+
+  ```protobuf
+  message Push_RefreshPlayerChip{
+  	sint32 type;			//1:筹码 2：积分
+  	sint32 dynamic_money;	//变动的金额
+  	sint32 total_money;		//变动后的总金额
+  }
+  ```
+
+
 
