@@ -226,7 +226,6 @@ end
   --	频道: VerifyLogin
   ```
   
-  
 
 ## 收发协议
 
@@ -250,6 +249,15 @@ end
 - **<u>协议内容为空即默认为没有data</u>**
 
 - <u>**Push的协议, 默认没有code**</u>
+
+
+
+## MQTT验证信息
+
+- 客户端 在**MQTT**第一次连接的 
+  - **username** 中，使用http协议中，等到**token**，用来验证，
+  - **password** 为空，不使用
+- 服务器在**topic:VerifyLogin** 中发 **S2C_Cmd**  消息
 
 
 
