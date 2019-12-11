@@ -12,7 +12,7 @@
 
 ```protobuf
 enum ResultCode {
-    RESULTCODE_DEFAULT = 0;		//	保留字段，不使用
+    RESULTCODE_DEFAULT = 0;	//	保留字段，不使用
     OK = 1;                     //	成功
 
     ACCOUNT_NOT_EXIST = 2;      //  账号不存在
