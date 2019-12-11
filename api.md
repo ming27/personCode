@@ -12,15 +12,27 @@
 
 ```protobuf
 enum ResultCode {
-    DEFAULT = 0;                //保留字段，不使用
-    OK = 1;                     //成功
+    RESULTCODE_DEFAULT = 0;		//	保留字段，不使用
+    OK = 1;                     //	成功
 
-   	ACCOUNT_NOT_EXIST = 2;      //账号不存在
-   	ACCOUNT_EXIST = 3;          //账号已存在
-   	ACCOUNT_VERIFY_FAIL = 4;    //账号 验证错误
-   	TOKEN_FAIL = 5;             //token 验证错误
+    ACCOUNT_NOT_EXIST = 2;      //  账号不存在
+    ACCOUNT_EXIST = 3;          //  账号已存在
+    ACCOUNT_VERIFY_FAIL = 4;    //  账号 验证错误
+    TOKEN_FAIL = 5;             //  token 验证错误
+    DESK_NUM_FULL = 6;          //  桌子人数已满
+    BET_REVOCATION_FAIL = 7;    //  撤销下注信息不存在
+    CHIP_CHANGE_FAIL = 8;       //  余额修改错误
+    LEAVE_DESK_FAIL = 9;        //  离开桌子错误
+    SHOE_FIND_FAIL = 10;        //  牌靴数据不存在
+    BET_FAIL = 11;              //  下注信息 错误
+    SETTLE_STAGE_FAIL = 12;     //  结算状态 错误
+    LIMIT_RED_FAIL = 13;        //  限红数据不存在 错误
+    LIMIT_RED_MIN_FAIL = 14;    //  限红数据 最小下限  错误
+    LIMIT_RED_MXA_FAIL = 15;    //  限红数据 最大下限 错误
+    COMMISSION_FAIL = 16;       //  设置 佣金 错误
 
-	FAIL = 9999;               //服务器 未定义的错误，客户端一般显示：服务器维护中，稍后再试
+
+	FAIL = 9999;               	//	服务器 未定义的错误，客户端一般显示：服务器维护中，稍后再试
 }
 ```
 
