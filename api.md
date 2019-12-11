@@ -34,7 +34,7 @@ enum ResultCode {
 
 - 访问地址
   - 内网：**http://192.168.1.106:7770/gamble**
-  - 外网：**http://13.251.170.154:7770/gamble**
+  - 外网：**http://3.0.249.57:7770/gamble**
 - 数据请求格式： **POST**
 - 参数 : **protobuff 二进制**
 - 包名: **HttpProto.xxx**
@@ -47,8 +47,9 @@ enum ResultCode {
 
   ```protobuf
   enum RequestType {
-      REGISTER = 0;   //注册
-      LOGIN = 1;      //登录
+      REGISTER = 0;   	//	注册
+      LOGIN = 1;      	//	登录
+      GUEST_LOGIN = 2; 	//	游客登陆
   }
   ```
   
@@ -57,7 +58,7 @@ enum ResultCode {
   ```protobuf
   message C2S_Cmd {
       RequestType type;
-      bytes data;			//客户端 请求的信息内容
+      bytes data;		//	客户端 请求的信息内容
   }
   ```
 
@@ -66,7 +67,7 @@ enum ResultCode {
   ```protobuf
   message S2C_Cmd {
       ResultCode result;
-      bytes data;     	    //客户端 接收的信息内容，可选字段，可以为空
+      bytes data;		//	客户端 接收的信息内容，可选字段，可以为空
   }
   ```
 
@@ -133,6 +134,31 @@ enum ResultCode {
     }
     ```
     
+
+###  **游客登陆**
+
+  + C2S
+
+    ```protobuf
+    message C2S_Guest {
+    	string imie;	//	唯一设备号
+    }
+    ```
+
+  + S2C
+
+    ```protobuf
+    //	Successful Response
+    message S2C_Guest {
+        string token;
+    }
+    
+    //	Fail Response
+    message S2C_Guest {
+    }
+    ```
+
+
 
 ###  请求MQTT服务器列表 
 
@@ -208,7 +234,7 @@ end
 - 访问地址：
 
   - 内网： **http://192.168.1.106:7771** 
-  - 外网： **http://13.251.170.154:7771**
+  - 外网： **http://3.0.249.57:7771**
 
 - 包名: **TcpProto.xxx**
 
@@ -323,6 +349,8 @@ end
   	sint64 integral		//	积分余额
   	sint32 game_count;	//	已玩的游戏次数
   	sint64 start_time;	//	第一次进入游戏的时间
+  	sint32 limitRed;	//	限红 设置 读取配置表
+  	sint32 commission;	//  免佣的设置 默认不免佣 0：不免佣 1：免佣
   }
   
   //	Fail Response
@@ -331,7 +359,47 @@ end
   ```
   
 
+### 设置限红
 
+- Type: Requests and Responses
+
++ Topic: **SetLimitRed**
+
++ C2S
+
+  ```protobuf
+  message C2S_SetLimitRed {
+  	sint32 limitRed;	//	限红 设置 读取配置表
+  }
+  ```
+
++ S2C
+
+  ```protobuf
+  message S2C_SetLimitRed {
+  }
+  ```
+
+### 设置佣金
+
+- Type: Requests and Responses
+
++ Topic: **SetCommission**
+
++ C2S
+
+  ```protobuf
+  message C2S_SetCommission {
+  	sint32 commission;	//	免佣的设置 0：不免佣 1：免佣
+  }
+  ```
+
++ S2C
+
+  ```protobuf
+  message S2C_SetCommission {
+  }
+  ```
 
 ### 选择游戏
 
@@ -351,10 +419,6 @@ end
   message S2C_SelectGame {
   }
   ```
-
-
-
-- 
 
 ### 获取牌桌信息(暂定可跨游戏获取信息)
 
@@ -587,22 +651,23 @@ message Card {
 
 //	百家乐、龙虎或红黑 下注区域
 message BetInfo {
-	sint32 player;			//	闲 -1：撤销全部
-	sint32 banker;			//	庄 -1：撤销全部
-	sint32 tie;				//	和 -1：撤销全部
-	sint32 player_pair;		//	闲对 	-1：撤销全部 只有百家乐使用，龙虎和红黑不使用
-	sint32 banker_pair;		//	庄对 	-1：撤销全部 只有百家乐使用，龙虎和红黑不使用
-	sint32 lucky_six;		//	幸运6	-1：撤销全部 只有百家乐使用，龙虎和红黑不使用
+	sint32 player;				//	闲 -1：撤销全部
+	sint32 banker;				//	庄 -1：撤销全部
+	sint32 tie;					//	和 -1：撤销全部
+	sint32 player_pair;			//	闲对 	-1：撤销全部 只有百家乐使用，龙虎和红黑不使用
+	sint32 banker_pair;			//	庄对 	-1：撤销全部 只有百家乐使用，龙虎和红黑不使用
+	sint32 lucky_six;			//	幸运6 两张牌 或 三张牌	-1：撤销全部 只有百家乐使用，龙虎和红黑不使
 }
 
 //	百家乐、龙虎或红黑 下注区域 显示使用
 message BetInfoShow {
-	repeated sint32 player;			//	闲 
-	repeated sint32 banker;			//	庄 
-	repeated sint32 tie;			//	和 
-	repeated sint32 player_pair;	//	闲对 	
-	repeated sint32 banker_pair;	//	庄对 	
-	repeated sint32 lucky_six;		//	幸运6
+	repeated sint32 player;				//	闲 
+	repeated sint32 banker;				//	庄 
+	repeated sint32 tie;				//	和 
+	repeated sint32 player_pair;		//	闲对 	
+	repeated sint32 banker_pair;		//	庄对 	
+	repeated sint32 lucky_six;			//	幸运6 两张牌 或 三张牌
+
 }
 
 //	桌子上的玩家信息
@@ -828,8 +893,9 @@ message PlayerInfo {
 + Topic: **NormalBaccaratSyncBetChangePB**
 
   ```protobuf
-  message Push_BetSync
-	```
+  //qur
+	message Push_BetSync 
+  ```
   
 ######  撤销下注推送
 
@@ -845,6 +911,26 @@ message PlayerInfo {
   }
   ```
 
+##### 结算完成
+
+- Type: Requests and Push
+
+- Topic: **NormalBaccaratSettleFinish**
+
+- C2S
+
+  ```protobuf
+  message C2S_SettleFinish {
+  }
+  ```
+
+- S2C
+
+  ```protobuf
+  message S2C_SettleFinish {
+  	sint32 isContinue;		//	是否进入下一个阶段 0：不能进入 1：可以进入 2: 进入换牌靴阶段
+  }	
+  ```
 
 ##### 离开牌桌
 
@@ -878,6 +964,29 @@ message PlayerInfo {
   }
   ```
 
+##### 弃牌
+
++ Type:  Requests and Push
+
++ Topic: **NormalBaccaratGiveUp**
+
++ C2S
+
+  ```protobuf
+  message C2S_BaccaratGiveUp {
+  	
+  }
+  ```
+
++ S2C
+
+  ```protobuf
+  message S2C_BaccaratGiveUp {
+  	
+  }
+  ```
+
+  
 
 #### 龙虎斗
 
@@ -1321,25 +1430,21 @@ message Push_SnakeWeelBet {
 
   ```protobuf
   message C2S_GetMoreBaccaratDeskInfoList{
-   	
   }
   ```
-
+  
 - S2C
 
   ```protobuf
-  message MoreBaccaratDeskInfo{
-  	sint32 game_id;			//游戏ID,ID对应游戏通过读表同步
-  	sint32 desk_id;			//牌桌ID
-  	string hero_icon;		//人物头像地址（图片可能存储在本地，可能为头像名称）
-  	
-  	repeated string road_list;		//百家乐路单格式
-  	
-  	//Push_StageSync 百家乐游戏阶段同步（下注，开牌，结算，洗牌）
-  	sint32 game_stage;		//	读表获取阶段ID
-  	sint64 start_time;		//	开始时间
-      sint64 ent_time;		//	结束时间
-      sint64 push_time;		//	协议发出时间
+  message MoreBaccaratDeskInfo {
+  	sint32 game_id;						//	游戏ID,ID对应游戏通过读表同步
+  	sint32 desk_id;						//	牌桌ID
+  	string hero_icon;					//	人物头像地址（图片可能存储在本地，可能为头像名称）
+  	repeated string road_list;			//	百家乐路单格
+  	sint32 game_stage;					//	读表获取阶段ID
+  	sint64 start_time;					//	开始时间
+      sint64 ent_time;					//	结束时间
+      sint64 push_time;					//	协议发出时间
       //	下列参数, 同时只存在一个
       BetStage bet_data;					//	下注阶段
       OpenCardStage open_card_data;		//	取数和开牌阶段
@@ -1353,13 +1458,12 @@ message Push_SnakeWeelBet {
   }
   //Fail Response
   message S2C_GetMoreBaccaratDeskInfoList{
-  
   }
   ```
 
 
 
-### 多台列表刷新（12桌）
+### 多台列表刷新（12桌） 
 
 - Type:Push 
 
@@ -1369,6 +1473,7 @@ message Push_SnakeWeelBet {
 
   ```protobuf
   message Push_RefreshMoreBaccarat{
+  	sint32 game_id;					//	游戏ID,ID对应游戏通过读表同步
   	sint32 desk_id;
   	
   	//repeated string road_list;		//百家乐路单格式,结算状态时有值
@@ -1384,7 +1489,8 @@ message Push_SnakeWeelBet {
       ShuffleStage shuffle_data;			//	换牌靴阶段
   }
   ```
-
+```
+  
   
 
 
@@ -1399,11 +1505,8 @@ message Push_SnakeWeelBet {
 
   ```protobuf
   message C2S_GetMoreBaccaratAllDeskInfoList{
-  	
   }
-  
-  
-  ```
+```
 
 - S2C
 
